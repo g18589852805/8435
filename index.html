@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>PC28 预测系统 | 智能推荐版</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f0f2f5;
+            padding: 12px;
+            color: #1e293b;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .logo-area {
+            text-align: center;
+            margin-bottom: 16px;
+            padding: 15px 0 10px 0;
+            background: linear-gradient(135deg, #fff 0%, #fef2f2 100%);
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(255,42,42,0.15);
+        }
+        .logo-text {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #ff2a2a;
+            letter-spacing: 4px;
+            text-shadow: 0 0 5px rgba(255,42,42,0.5), 0 0 10px rgba(255,42,42,0.3);
+        }
+        .wangwang {
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ff2a2a;
+            margin-top: 8px;
+            letter-spacing: 1px;
+        }
+        @media (min-width: 768px) {
+            .logo-area { margin-bottom: 20px; padding: 20px 0 15px 0; }
+            .logo-text { font-size: 2.5rem; letter-spacing: 6px; }
+            .wangwang { font-size: 1.2rem; }
+        }
+        
+        .dragon-alert {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            font-size: 0.7rem;
+            color: #92400e;
+        }
+        .dragon-alert .title { font-weight: 700; margin-bottom: 6px; font-size: 0.75rem; }
+        .dragon-list { display: flex; flex-wrap: wrap; gap: 12px; }
+        .dragon-item { background: #fffbeb; padding: 4px 10px; border-radius: 20px; font-size: 0.65rem; }
+        @media (min-width: 768px) {
+            .dragon-alert { padding: 12px 16px; font-size: 0.75rem; }
+            .dragon-item { font-size: 0.7rem; }
+        }
+        
+        .responsive-grid { display: flex; flex-direction: column; gap: 12px; }
+        @media (min-width: 768px) {
+            body { padding: 20px; }
+            .responsive-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+            .full-width { grid-column: span 2; }
+        }
+        
+        .header-bar { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+        @media (min-width: 768px) { .header-bar { margin-bottom: 16px; } }
+        .refresh-btn {
+            background: #3b82f6; color: white; border: none;
+            padding: 6px 16px; border-radius: 40px; cursor: pointer;
+            font-weight: 600; font-size: 0.8rem;
+        }
+        @media (min-width: 768px) { .refresh-btn { padding: 8px 20px; font-size: 0.85rem; } }
+        .refresh-btn:hover { background: #2563eb; }
+        
+        .card {
+            background: white; border-radius: 14px; padding: 12px 14px;
+            margin-bottom: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            position: relative;
+        }
+        @media (min-width: 768px) { .card { border-radius: 16px; padding: 14px 18px; } }
+        .card-title {
+            font-size: 0.85rem; font-weight: 600; margin-bottom: 10px;
+            padding-bottom: 6px; border-bottom: 2px solid #eef2ff;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 6px;
+        }
+        @media (min-width: 768px) { .card-title { font-size: 1rem; margin-bottom: 12px; padding-bottom: 8px; } }
+        
+        .kill-group-card { background: #fef2f2; border-left: 4px solid #dc2626; }
+        .kill-group-value { font-size: 1.3rem; font-weight: 800; color: #b91c1c; text-align: center; padding: 6px; }
+        @media (min-width: 768px) { .kill-group-value { font-size: 1.6rem; padding: 8px; } }
+        
+        .formula-tab {
+            background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 10px;
+            padding: 6px 10px; cursor: pointer; text-align: center;
+            flex: 1; min-width: 60px;
+            position: relative;
+            transition: all 0.2s;
+        }
+        .formula-tab.recommended {
+            background: #ff2a2a;
+            border-color: #ff2a2a;
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+        .formula-tab .recommend-bubble {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff2a2a;
+            color: white;
+            font-size: 0.55rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 20px;
+            white-space: nowrap;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        @media (min-width: 768px) {
+            .formula-tab { border-radius: 12px; padding: 8px 14px; min-width: 70px; }
+            .formula-tab .recommend-bubble { font-size: 0.6rem; top: -10px; right: -10px; padding: 2px 8px; }
+        }
+        
+        .prediction-item {
+            flex: 1; text-align: center; background: #eff6ff;
+            padding: 8px; border-radius: 12px;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .prediction-item.recommended {
+            background: #ff2a2a;
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+        .prediction-item .dual-bubble {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #3b82f6;
+            color: white;
+            font-size: 0.55rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+        @media (min-width: 768px) {
+            .prediction-item { padding: 10px; border-radius: 16px; }
+            .prediction-item .dual-bubble { font-size: 0.6rem; top: -10px; }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.02); opacity: 0.95; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .formula-tab:hover { background: #e2e8f0; }
+        .formula-tab.active { background: #3b82f6; border-color: #3b82f6; color: white; }
+        .formula-tab .tab-name { font-weight: 600; font-size: 0.7rem; }
+        .formula-tab .tab-stats { font-size: 0.55rem; opacity: 0.8; }
+        @media (min-width: 768px) { .formula-tab .tab-name { font-size: 0.8rem; }
+        .formula-tab .tab-stats { font-size: 0.6rem; } }
+        
+        .sub-options {
+            display: flex; gap: 6px; flex-wrap: wrap;
+            margin-bottom: 12px; padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        @media (min-width: 768px) { .sub-options { gap: 8px; margin-bottom: 16px; padding-bottom: 12px; } }
+        .sub-option {
+            background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 16px;
+            padding: 3px 10px; font-size: 0.65rem; cursor: pointer;
+        }
+        @media (min-width: 768px) { .sub-option { border-radius: 20px; padding: 4px 12px; font-size: 0.7rem; } }
+        .sub-option:hover { background: #e2e8f0; }
+        .sub-option.active { background: #2563eb; border-color: #2563eb; color: white; }
+        
+        .dual-card {
+            background: white; border-radius: 14px; padding: 12px 14px;
+            margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        @media (min-width: 768px) { .dual-card { border-radius: 16px; padding: 14px 18px; margin-bottom: 16px; } }
+        .dual-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px;
+        }
+        @media (min-width: 768px) { .dual-header { margin-bottom: 12px; } }
+        .dual-header h3 { font-size: 0.85rem; font-weight: 600; }
+        @media (min-width: 768px) { .dual-header h3 { font-size: 0.9rem; } }
+        .countdown-box {
+            background: #0f172a; color: #38bdf8; padding: 3px 10px;
+            border-radius: 30px; font-family: monospace; font-size: 0.85rem; font-weight: bold;
+        }
+        @media (min-width: 768px) { .countdown-box { padding: 4px 12px; font-size: 1rem; } }
+        
+        .dual-prediction { display: flex; gap: 12px; justify-content: center; }
+        .prediction-label { font-size: 0.6rem; color: #475569; }
+        .prediction-value { font-size: 1.1rem; font-weight: 800; color: #2563eb; }
+        @media (min-width: 768px) { .prediction-label { font-size: 0.65rem; }
+        .prediction-value { font-size: 1.3rem; } }
+        
+        .numbers-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; justify-content: center; }
+        .num-badge {
+            background: #f1f5f9; padding: 6px 12px; border-radius: 24px;
+            font-family: monospace; font-size: 1rem; font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 48px;
+            text-align: center;
+        }
+        .num-badge:hover { background: #cbd5e1; transform: scale(1.05); }
+        .num-badge.remain { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+        @media (min-width: 768px) {
+            .num-badge { font-size: 1.2rem; padding: 8px 16px; min-width: 56px; }
+        }
+        
+        .analysis-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 12px; }
+        @media (min-width: 768px) { .analysis-grid { gap: 8px; margin-bottom: 16px; } }
+        .analysis-num {
+            background: #f1f5f9; text-align: center; padding: 6px 2px;
+            border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 0.7rem;
+        }
+        @media (min-width: 768px) { .analysis-num { padding: 8px 4px; border-radius: 10px; font-size: 0.8rem; } }
+        .analysis-num:hover { background: #e2e8f0; }
+        .analysis-num.active { background: #3b82f6; color: white; }
+        
+        .analysis-stats {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 12px;
+        }
+        @media (min-width: 768px) { .analysis-stats { grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; } }
+        .stat-card {
+            background: #f8fafc; padding: 8px; border-radius: 10px; text-align: center;
+        }
+        @media (min-width: 768px) { .stat-card { padding: 10px; border-radius: 12px; } }
+        .stat-value { font-size: 1.1rem; font-weight: 800; color: #1e293b; }
+        .stat-label { font-size: 0.55rem; color: #64748b; margin-top: 3px; }
+        @media (min-width: 768px) { .stat-value { font-size: 1.4rem; }
+        .stat-label { font-size: 0.6rem; margin-top: 4px; } }
+        
+        .trend-bars { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+        .trend-item {
+            flex: 1; text-align: center; background: #f1f5f9;
+            padding: 6px; border-radius: 8px; font-size: 0.65rem;
+        }
+        @media (min-width: 768px) { .trend-item { padding: 8px; border-radius: 10px; font-size: 0.7rem; } }
+        .hit-positive { color: #16a34a; }
+        .hit-negative { color: #dc2626; }
+        .top10-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+        .top10-item {
+            background: #f1f5f9; padding: 3px 8px; border-radius: 16px; font-size: 0.6rem;
+        }
+        @media (min-width: 768px) { .top10-item { padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; } }
+        
+        .history-table { width: 100%; border-collapse: collapse; font-size: 0.6rem; }
+        @media (min-width: 768px) { .history-table { font-size: 0.65rem; } }
+        .history-table th, .history-table td { padding: 5px 2px; text-align: center; border-bottom: 1px solid #e2e8f0; }
+        @media (min-width: 768px) { .history-table th, .history-table td { padding: 6px 3px; } }
+        .history-table th { background: #f8fafc; font-weight: 600; }
+        
+        .badge {
+            display: inline-block; padding: 2px 5px; border-radius: 10px;
+            font-size: 0.55rem; font-weight: 600;
+        }
+        @media (min-width: 768px) { .badge { padding: 2px 6px; border-radius: 12px; font-size: 0.6rem; } }
+        .badge-dadan { background: #fee2e2; color: #991b1b; }
+        .badge-dashuang { background: #fff3e3; color: #c2410c; }
+        .badge-xiaodan { background: #e0f2fe; color: #0369a1; }
+        .badge-xiaoshuang { background: #dcfce7; color: #166534; }
+        
+        .hit-true, .hit-false {
+            display: inline-block; padding: 2px 4px; border-radius: 8px; font-size: 0.55rem;
+        }
+        .hit-true { color: #16a34a; background: #dcfce7; }
+        .hit-false { color: #dc2626; background: #fee2e2; }
+        @media (min-width: 768px) { .hit-true, .hit-false { padding: 2px 5px; border-radius: 10px; font-size: 0.6rem; } }
+        
+        .footer { text-align: center; margin-top: 12px; color: #94a3b8; font-size: 0.55rem; }
+        .footer-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        @media (min-width: 768px) { .footer { margin-top: 16px; font-size: 0.6rem; } }
+        .analysis-content { display: none; }
+        .analysis-content.show { display: block; }
+        .full-width { width: 100%; }
+        .visitor-count {
+            background: #f1f5f9; padding: 2px 8px; border-radius: 20px; font-size: 0.6rem;
+        }
+        @media (min-width: 768px) { .visitor-count { font-size: 0.65rem; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="logo-area">
+        <div class="logo-text">暂时的暗无天日</div>
+        <div class="wangwang">旺旺号：587008898</div>
+    </div>
+
+    <div class="dragon-alert" id="dragonAlert" style="display:none;">
+        <div class="title">🐉 进行中的长龙</div>
+        <div class="dragon-list" id="dragonList"></div>
+    </div>
+
+    <div class="header-bar">
+        <button class="refresh-btn" id="refreshBtn">🔄 刷新数据</button>
+    </div>
+
+    <div class="dual-card">
+        <div class="dual-header">
+            <h3>📊 双组预测</h3>
+            <div class="countdown-box" id="countdown">--:--:--</div>
+        </div>
+        <div class="dual-prediction" id="dualPrediction">
+            <div class="prediction-item" id="predItemA">
+                <div class="prediction-label">组合 A</div>
+                <div class="prediction-value" id="predA">--</div>
+            </div>
+            <div class="prediction-item" id="predItemB">
+                <div class="prediction-label">组合 B</div>
+                <div class="prediction-value" id="predB">--</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="responsive-grid">
+        <div class="card kill-group-card">
+            <div class="card-title">🎯 杀组</div>
+            <div class="kill-group-value" id="killGroup">--</div>
+        </div>
+        <div class="card">
+            <div class="card-title">🎲 特码推荐 <span style="font-size:0.6rem; font-weight:normal;" id="remainCount"></span></div>
+            <div class="numbers-grid" id="remainingNumbers"></div>
+        </div>
+    </div>
+
+    <div class="card full-width">
+        <div class="formula-tabs" id="formulaTabs"></div>
+        <div class="sub-options" id="subOptions"></div>
+    </div>
+
+    <div class="card full-width">
+        <div class="card-title" id="analysisTitle" style="cursor:pointer;">
+            📈 号码分析 <span style="font-size:0.7rem; color:#64748b;">▼</span>
+        </div>
+        <div id="analysisContent" class="analysis-content">
+            <div style="margin-bottom:10px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                <span style="font-size:0.65rem;">统计期数</span>
+                <input type="number" id="analysisPeriod" value="500" min="10" max="500" step="10" style="width:70px; padding:4px; border-radius:8px; border:1px solid #cbd5e1; text-align:center; font-size:0.7rem;">
+                <button id="analyzeBtn" style="background:#3b82f6; color:white; border:none; padding:4px 10px; border-radius:20px; font-size:0.65rem; cursor:pointer;">分析</button>
+            </div>
+            <div class="analysis-grid" id="analysisNumsGrid"></div>
+            <div id="analysisDetail"></div>
+        </div>
+    </div>
+
+    <div class="card full-width">
+        <div class="card-title">📜 历史开奖</div>
+        <div style="overflow-x:auto;">
+            <table class="history-table" id="historyTable">
+                <thead><tr><th>期号</th><th>号码</th><th>特码</th><th>组合</th><th>杀组</th><th>✔/✘</th><th>双组</th><th>✔/✘</th><th>特码推荐</th><th>✔/✘</th></tr></thead>
+                <tbody id="historyBody"><tr><td colspan="10" style="text-align:center;">加载中...<\/td><\/tr><\/tbody>
+            <\/table>
+        <\/div>
+    <\/div>
+    
+    <div class="footer">
+        <div class="footer-inner">
+            <span id="visitorCounter" class="visitor-count">今日独立访客：--</span>
+            <span>点击号码分析 | 杀组双组智能推荐 | 特码4码精准预测</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'https://pc28.help';
+    let refreshInterval = null, countdownInterval = null;
+    let allPeriodsCache = [];
+    let selectedAnalysisNum = 17, analysisExpanded = false;
+    
+    let omissionData = {}, todayCountData = {}, dragonData = { xh: [], jt: [], abb: [], pl: [] };
+    let auxDataLoaded = false;
+    
+    const formatTwoDigit = (n) => n.toString().padStart(2, '0');
+    const getCombination = (num) => (num >= 0 && num <= 13 ? '小' : '大') + (num % 2 === 0 ? '双' : '单');
+    const getOppositeCombination = (comb) => ({ '大单':'小双','大双':'小单','小单':'大双','小双':'大单' }[comb] || comb);
+    const numToComb = (num) => (num !== undefined && num !== null) ? getCombination(num) : null;
+    
+    const combNumbers = {
+        '小单': [1,3,5,7,9,11,13],
+        '小双': [0,2,4,6,8,10,12],
+        '大单': [15,17,19,21,23,25,27],
+        '大双': [14,16,18,20,22,24,26]
+    };
+    
+    // ==================== 杀组公式 ====================
+    function formula1(p1, p2, p3, option) {
+        try {
+            const [a,b,c] = p1.nums;
+            const sumVal = p1.sum;
+            const reversed = [c, b, a].join('');
+            let sumTen = Math.floor(sumVal / 10);
+            if (sumTen === 0 && sumVal > 0) sumTen = sumVal % 10;
+            if (sumTen === 0) return null;
+            const combined = sumTen.toString() + reversed;
+            const combinedNum = parseInt(combined);
+            const result = combinedNum / sumVal;
+            const intPart = Math.floor(result);
+            let digitSum = 0;
+            const intStr = intPart.toString();
+            if (intStr.length >= 3) {
+                const lastThree = intStr.slice(-3);
+                digitSum = lastThree.split('').reduce((s, d) => s + parseInt(d), 0);
+            } else {
+                digitSum = intStr.split('').reduce((s, d) => s + parseInt(d), 0);
+            }
+            const resultNum = digitSum;
+            if (resultNum > 27) return null;
+            const comb = numToComb(resultNum);
+            if (!comb) return null;
+            if (option === 'self') return comb;
+            if (option === 'complement') {
+                const includeMap = { '小单':['小单','小双','大单'], '小双':['小双','小单','大双'], '大单':['大单','大双','小单'], '大双':['大双','大单','小双'] };
+                const includes = includeMap[comb] || [];
+                const all = ['小单','小双','大单','大双'];
+                const complement = all.find(c => !includes.includes(c));
+                return complement || getOppositeCombination(comb);
+            }
+            return null;
+        } catch(e) { return null; }
+    }
+    
+    function formula2(p1, p2, p3, option) {
+        try {
+            const val1 = p1.nums[1], val2 = p2.nums[0], val3 = p3.nums[2];
+            const sumVal = val1 + val2 + val3;
+            if (sumVal > 27) return null;
+            const comb = numToComb(sumVal);
+            if (!comb) return null;
+            if (option === 'self') return comb;
+            if (option === 'opposite') return getOppositeCombination(comb);
+            if (option === 'oppositeSize') return (comb === '大单' ? '小单' : comb === '大双' ? '小双' : comb === '小单' ? '大单' : '大双');
+            return null;
+        } catch(e) { return null; }
+    }
+    
+    function formula3(p1, p2, p3, option) {
+        try {
+            const sumTen = Math.floor(p1.sum / 10);
+            const val2 = p2.nums[0], val3 = p3.nums[2];
+            const mid = sumTen + val2 + val3;
+            const total = mid + p1.sum;
+            if (total > 27) return null;
+            const comb = numToComb(total);
+            if (!comb) return null;
+            if (option === 'self') return comb;
+            if (option === 'opposite') return getOppositeCombination(comb);
+            return null;
+        } catch(e) { return null; }
+    }
+    
+    function formula4(p1, p2, p3, option) {
+        try {
+            const threeNum = parseInt(p1.nums.join(''));
+            const sqrtVal = Math.sqrt(threeNum);
+            const multiplied = sqrtVal * 9;
+            const str = multiplied.toString().replace('.', '');
+            if (str.length < 3) return null;
+            const frontThree = str.slice(0,3).split('').map(Number);
+            const backThree = str.slice(-3).split('').map(Number);
+            const frontSum = frontThree.reduce((a,b)=>a+b,0);
+            const backSum = backThree.reduce((a,b)=>a+b,0);
+            if (option === 'front') { const c = numToComb(frontSum); return c ? getOppositeCombination(c) : null; }
+            if (option === 'back') { const c = numToComb(backSum); return c ? getOppositeCombination(c) : null; }
+            return null;
+        } catch(e) { return null; }
+    }
+    
+    const killFormulas = [
+        { name: '公式1_杀本身', func: (p1,p2,p3) => formula1(p1,p2,p3,'self'), group: 0 },
+        { name: '公式1_杀互补', func: (p1,p2,p3) => formula1(p1,p2,p3,'complement'), group: 0 },
+        { name: '公式2_杀本身', func: (p1,p2,p3) => formula2(p1,p2,p3,'self'), group: 1 },
+        { name: '公式2_杀相反组合', func: (p1,p2,p3) => formula2(p1,p2,p3,'opposite'), group: 1 },
+        { name: '公式2_杀相反大小', func: (p1,p2,p3) => formula2(p1,p2,p3,'oppositeSize'), group: 1 },
+        { name: '公式3_杀本身', func: (p1,p2,p3) => formula3(p1,p2,p3,'self'), group: 2 },
+        { name: '公式3_杀相反组合', func: (p1,p2,p3) => formula3(p1,p2,p3,'opposite'), group: 2 },
+        { name: '公式4_前三位', func: (p1,p2,p3) => formula4(p1,p2,p3,'front'), group: 3 },
+        { name: '公式4_后三位', func: (p1,p2,p3) => formula4(p1,p2,p3,'back'), group: 3 }
+    ];
+    
+    let currentFormulaIdx = 0;
+    
+    // ==================== 辅助API ====================
+    async function fetchAuxData() {
+        if (auxDataLoaded) return;
+        try {
+            const [yl, yk, xh, jt, abb, pl] = await Promise.all([
+                fetch(`${API_BASE}/api/yl.json`).then(r=>r.json()),
+                fetch(`${API_BASE}/api/yk.json`).then(r=>r.json()),
+                fetch(`${API_BASE}/api/xh.json`).then(r=>r.json()),
+                fetch(`${API_BASE}/api/jt.json`).then(r=>r.json()),
+                fetch(`${API_BASE}/api/abb.json`).then(r=>r.json()),
+                fetch(`${API_BASE}/api/pl.json`).then(r=>r.json())
+            ]);
+            if (yl.message === 'success') omissionData = yl.data;
+            if (yk.message === 'success') todayCountData = yk.data;
+            if (xh.message === 'success') dragonData.xh = xh.data || [];
+            if (jt.message === 'success') dragonData.jt = jt.data || [];
+            if (abb.message === 'success') dragonData.abb = abb.data || [];
+            if (pl.message === 'success') dragonData.pl = pl.data || [];
+            auxDataLoaded = true;
+        } catch(e) { console.log("辅助数据加载失败", e); }
+    }
+    
+    function showDragonAlert() {
+        const allDragons = [...dragonData.xh, ...dragonData.jt, ...dragonData.abb, ...dragonData.pl];
+        const activeDragons = allDragons.filter(d => d.status === '进行中');
+        const container = document.getElementById('dragonAlert');
+        const listContainer = document.getElementById('dragonList');
+        if (activeDragons.length === 0) { container.style.display = 'none'; return; }
+        container.style.display = 'block';
+        listContainer.innerHTML = activeDragons.map(d => {
+            let typeName = '';
+            if (d.type === '循环') typeName = '🔄循环';
+            else if (d.type === '交替') typeName = '🔁交替';
+            else if (d.type === 'abb循环') typeName = '📊ABB';
+            else typeName = '💰赔率';
+            return `<div class="dragon-item">${typeName} ${d.content}: ${d.sequence} → 预期${d.expected} (${d.count}期)</div>`;
+        }).join('');
+    }
+    
+    // ==================== 双组预测核心 ====================
+    function calculateXYZ(p1, p2, p3) {
+        const [a1,a2,a3]=p1.nums, [b1,b2,b3]=p2.nums, [c1,c2,c3]=p3.nums;
+        return { X: a1+b2+c3, Y: a3+b2+c1, Z: b2+c1+c3 };
+    }
+    function calculateTrendFromXYZ(xyz) {
+        const vals=[xyz.X,xyz.Y,xyz.Z];
+        const oddCnt=vals.filter(v=>v%2===1).length, evenCnt=3-oddCnt;
+        const bigCnt=vals.filter(v=>v>=14).length, smallCnt=3-bigCnt;
+        let predParity = oddCnt>evenCnt?'双':(evenCnt>oddCnt?'单':(vals[0]%2===0?'单':'双'));
+        let predSize = bigCnt>smallCnt?'小':(smallCnt>bigCnt?'大':(vals[0]>=14?'小':'大'));
+        return predSize+predParity;
+    }
+    function expandTrendToCandidates(trend) {
+        const map={'小单':['小单','小双','大单'],'小双':['小双','小单','大双'],'大单':['大单','大双','小单'],'大双':['大双','大单','小双']};
+        return map[trend]||[];
+    }
+    
+    function selectFinalCandidates(candidates, killGroup, remainingNumbers) {
+        let filtered = candidates.filter(c => c !== killGroup);
+        if (filtered.length <= 2) return { a: filtered[0] || '--', b: filtered[1] || '--' };
+        const combNumberMap = { '小单':[1,3,5,7,9,11,13], '小双':[0,2,4,6,8,10,12], '大单':[15,17,19,21,23,25,27], '大双':[14,16,18,20,22,24,26] };
+        const withCount = filtered.map(c => ({ comb: c, count: (combNumberMap[c]||[]).filter(n => remainingNumbers.includes(n)).length }));
+        withCount.sort((a,b)=>b.count-a.count);
+        return { a: withCount[0].comb, b: withCount[1].comb };
+    }
+    function getDualPredictions(periods, killGroup, remainingNumbers) {
+        if(periods.length<3) return {a:'--',b:'--'};
+        const xyz=calculateXYZ(periods[0],periods[1],periods[2]);
+        const trend=calculateTrendFromXYZ(xyz);
+        const candidates=expandTrendToCandidates(trend);
+        return selectFinalCandidates(candidates, killGroup, remainingNumbers);
+    }
+    
+    // ==================== 杀组推荐（过热规避）====================
+    function getFormulaConsecutiveStreaks(periods, formulaIdx, maxCheck=100) {
+        let streaks = [];
+        let current = 0;
+        for(let i=periods.length-1; i>=3 && (periods.length - i) <= maxCheck; i--) {
+            const p3=periods[i-3], p2=periods[i-2], p1=periods[i-1], target=periods[i];
+            const kill = killFormulas[formulaIdx].func(p1, p2, p3);
+            if(kill && target.comb) {
+                if(target.comb !== kill) {
+                    if(current>0) streaks.push(current);
+                    current=0;
+                } else {
+                    current++;
+                }
+            } else {
+                if(current>0) streaks.push(current);
+                current=0;
+            }
+        }
+        if(current>0) streaks.push(current);
+        return streaks;
+    }
+    
+    function getHotThreshold(periods, formulaIdx) {
+        const streaks = getFormulaConsecutiveStreaks(periods, formulaIdx, 100);
+        if(streaks.length===0) return { avg:0, threshold:2 };
+        const avg = streaks.reduce((a,b)=>a+b,0)/streaks.length;
+        const variance = streaks.map(s=>Math.pow(s-avg,2)).reduce((a,b)=>a+b,0)/streaks.length;
+        const std = Math.sqrt(variance);
+        const threshold = avg + 0.5 * std;
+        return { avg, threshold };
+    }
+    
+    function getCurrentConsecutive(periods, formulaIdx) {
+        let count = 0;
+        for(let i=periods.length-1; i>=3; i--) {
+            const p3=periods[i-3], p2=periods[i-2], p1=periods[i-1], target=periods[i];
+            const kill = killFormulas[formulaIdx].func(p1, p2, p3);
+            if(kill && target.comb && target.comb !== kill) break;
+            if(kill && target.comb && target.comb === kill) count++;
+            else break;
+        }
+        return count;
+    }
+    
+    async function recommendBestFormula(periods) {
+        await fetchAuxData();
+        if(periods.length<50) return null;
+        let bestIdx = -1;
+        let bestScore = -Infinity;
+        for(let i=0;i<killFormulas.length;i++) {
+            const current = getCurrentConsecutive(periods, i);
+            const { threshold } = getHotThreshold(periods, i);
+            let score = current;
+            if(current >= threshold) score = -current; // 过热惩罚
+            if(score > bestScore) {
+                bestScore = score;
+                bestIdx = i;
+            }
+        }
+        if(bestIdx===-1) return null;
+        const current = getCurrentConsecutive(periods, bestIdx);
+        const { avg, threshold } = getHotThreshold(periods, bestIdx);
+        const isHot = current >= threshold;
+        return { idx: bestIdx, name: killFormulas[bestIdx].name, current, avg, threshold, isHot, score: bestScore };
+    }
+    
+    // ==================== 双组推荐（过热规避）====================
+    function getCombinationStreaks(periods, comb) {
+        let streaks = [];
+        let current = 0;
+        for(let i=periods.length-1; i>=0; i--) {
+            if(periods[i].comb === comb) current++;
+            else {
+                if(current>0) streaks.push(current);
+                current=0;
+            }
+        }
+        if(current>0) streaks.push(current);
+        return streaks;
+    }
+    function getCombinationHotThreshold(periods, comb) {
+        const streaks = getCombinationStreaks(periods, comb);
+        if(streaks.length===0) return { avg:0, threshold:2 };
+        const avg = streaks.reduce((a,b)=>a+b,0)/streaks.length;
+        const variance = streaks.map(s=>Math.pow(s-avg,2)).reduce((a,b)=>a+b,0)/streaks.length;
+        const std = Math.sqrt(variance);
+        const threshold = avg + 0.5 * std;
+        return { avg, threshold };
+    }
+    function getCurrentCombinationStreak(periods, comb) {
+        let count = 0;
+        for(let i=periods.length-1; i>=0; i--) {
+            if(periods[i].comb === comb) count++;
+            else break;
+        }
+        return count;
+    }
+    async function recommendDualCombinations(periods, candidates) {
+        await fetchAuxData();
+        const result = {};
+        for(let comb of candidates) {
+            const current = getCurrentCombinationStreak(periods, comb);
+            const { threshold } = getCombinationHotThreshold(periods, comb);
+            result[comb] = { current, threshold, isHot: current >= threshold };
+        }
+        return result;
+    }
+    
+    // ==================== 特码排除与智能推荐（4码）====================
+    function getVerticalExclude(p1,p2,p3) {
+        const [a1,a2,a3]=p1.nums,[b1,b2,b3]=p2.nums,[c1,c2,c3]=p3.nums;
+        return [a1+b1+c1, a2+b2+c2, a3+b3+c3].filter(v=>v>=0&&v<=27);
+    }
+    function getSplicingExclude(p1,p2) {
+        const pad=n=>n.toString().padStart(2,'0');
+        const A=parseInt(p1.nums.join('')+pad(p1.sum));
+        const B=parseInt(p2.nums.join('')+pad(p2.sum));
+        let M=(A+B)/(p1.sum+p2.sum);
+        const sumAB=p1.sum+p2.sum;
+        if(sumAB<=15) M/=3;
+        else if(sumAB<=25) M/=2;
+        const intPart=Math.floor(Math.abs(M));
+        const decimals=M.toString().split('.')[1]||'';
+        const excluded=new Set([intPart]);
+        for(let i=0;i<Math.min(decimals.length,6);i++) {
+            const d=parseInt(decimals[i]);
+            if(!isNaN(d)) { excluded.add(intPart+d); excluded.add(intPart-d); }
+        }
+        return Array.from(excluded).filter(v=>v>=0&&v<=27);
+    }
+    function getExtremeExclude() { return [...Array(6).keys(), ...Array.from({length:6},(_,i)=>22+i)]; }
+    function getAllExclude(periods, killGroup) {
+        if(periods.length<3) return [];
+        const [p1,p2,p3]=periods;
+        const exclude = new Set([...getVerticalExclude(p1,p2,p3), ...getSplicingExclude(p1,p2), ...getExtremeExclude()]);
+        if(killGroup && combNumbers[killGroup]) combNumbers[killGroup].forEach(n => exclude.add(n));
+        return Array.from(exclude).sort((a,b)=>a-b);
+    }
+    
+    function getNumberScore(num, periods, trend, killGroup) {
+        let score = 0;
+        const omission = omissionData[num] || 0;
+        score += omission * 0.5;
+        const todayCnt = todayCountData[num] || 0;
+        score -= todayCnt * 2;
+        let recentCount = 0;
+        for(let i=periods.length-1; i>=0 && i>=periods.length-50; i--) {
+            if(periods[i].sum === num) recentCount++;
+        }
+        score += recentCount * 0.8;
+        const comb = getCombination(num);
+        if(trend) {
+            if(comb[0] === trend[0]) score += 3;
+            if(comb[1] === trend[1]) score += 3;
+        }
+        for(let d of dragonData.xh) {
+            if(d.status === '进行中' && d.content === '组合' && d.expected === comb) score += 5;
+        }
+        return score;
+    }
+    
+    async function getTop4Numbers(periods, killGroup, trend) {
+        await fetchAuxData();
+        const excludeSet = new Set(getAllExclude(periods.slice(0,3), killGroup));
+        const candidates = [];
+        for(let i=0;i<=27;i++) {
+            if(!excludeSet.has(i)) candidates.push(i);
+        }
+        const scored = candidates.map(n => ({ num: n, score: getNumberScore(n, periods, trend, killGroup) }));
+        scored.sort((a,b) => b.score - a.score);
+        return scored.slice(0,4).map(item => item.num);
+    }
+    
+    // ==================== 其他辅助 ====================
+    async function fetchKjData(nbr=500) {
+        try {
+            const timestamp=Date.now();
+            const url=`${API_BASE}/api/kj.json?nbr=${nbr}&_=${timestamp}`;
+            const res=await fetch(url,{cache:'no-store'});
+            const json=await res.json();
+            if(json.message==='success' && Array.isArray(json.data)) return json.data;
+            return [];
+        } catch(e){ console.error("获取开奖失败",e); return []; }
+    }
+    async function fetchCountdown() {
+        try {
+            const res=await fetch(`${API_BASE}/api/keno.json?nbr=1`);
+            const json=await res.json();
+            if(json.countdown) document.getElementById('countdown').innerText=json.countdown;
+        } catch(e){}
+    }
+    function startCountdown(){ fetchCountdown(); if(countdownInterval) clearInterval(countdownInterval); countdownInterval=setInterval(fetchCountdown,1000); }
+    
+    function parseKjToPeriod(kjList) {
+        return kjList.map(item=>{
+            let nums=[0,0,0];
+            const drawNumber=item.draw_number||item.number;
+            if(drawNumber && typeof drawNumber==='string' && drawNumber.includes('+')) nums=drawNumber.split('+').map(Number);
+            const sum=parseInt(item.num||item.draw_num||item.number);
+            return { nbr:item.nbr, sum, nums, comb:item.combination, drawNumber };
+        }).filter(p=>p.nums.every(n=>!isNaN(n)) && !isNaN(p.sum));
+    }
+    
+    // ==================== 号码分析 ====================
+    function analyzeNumber(num, periods, maxCheck) {
+        const recentPeriods = periods.slice(-maxCheck);
+        const indices = [];
+        recentPeriods.forEach((p, idx) => { if(p.sum === num) indices.push(idx); });
+        const count = indices.length;
+        const probability = (count / maxCheck * 100).toFixed(2);
+        const theoretical = (1/28 * 100).toFixed(2);
+        let gaps = [], prevIdx = -1;
+        indices.forEach(idx => { if(prevIdx !== -1) gaps.push(idx - prevIdx); prevIdx = idx; });
+        const avgGap = gaps.length ? (gaps.reduce((a,b)=>a+b,0)/gaps.length).toFixed(1) : '-';
+        const lastIdx = indices.length ? indices[indices.length-1] : -1;
+        const missing = lastIdx === -1 ? maxCheck : (maxCheck - 1 - lastIdx);
+        let minGap = '-', maxGap = '-';
+        if(gaps.length) { minGap = Math.min(...gaps); maxGap = Math.max(...gaps); }
+        let beforeMap={}, afterMap={};
+        indices.forEach(idx => {
+            for(let j=Math.max(0, idx-5); j<idx; j++) beforeMap[recentPeriods[j].sum] = (beforeMap[recentPeriods[j].sum]||0)+1;
+            for(let j=idx+1; j<=idx+5 && j<recentPeriods.length; j++) afterMap[recentPeriods[j].sum] = (afterMap[recentPeriods[j].sum]||0)+1;
+        });
+        let deviations = [];
+        for(let n=0; n<=27; n++) {
+            const actual = afterMap[n] || 0;
+            const expected = indices.length / 28;
+            const percentDev = expected > 0 ? ((actual - expected) / expected * 100) : 0;
+            deviations.push({ num: n, deviation: percentDev.toFixed(2) });
+        }
+        deviations.sort((a,b)=>parseFloat(b.deviation)-parseFloat(a.deviation));
+        const top10 = deviations.slice(0,10);
+        return { count, probability, theoretical, avgGap, missing, minGap, maxGap, beforeMap, afterMap, top10 };
+    }
+    
+    function renderAnalysis(periods) {
+        const maxCheck = parseInt(document.getElementById('analysisPeriod').value) || 500;
+        const grid = document.getElementById('analysisNumsGrid');
+        grid.innerHTML = '';
+        for(let n=0; n<=27; n++) {
+            const btn = document.createElement('div');
+            btn.className = `analysis-num ${selectedAnalysisNum === n ? 'active' : ''}`;
+            btn.textContent = formatTwoDigit(n);
+            btn.onclick = () => { selectedAnalysisNum = n; renderAnalysis(periods); };
+            grid.appendChild(btn);
+        }
+        const stats = analyzeNumber(selectedAnalysisNum, periods, maxCheck);
+        const percentDiff = (parseFloat(stats.probability) - parseFloat(stats.theoretical)).toFixed(2);
+        const percentClass = percentDiff >= 0 ? 'hit-positive' : 'hit-negative';
+        const detail = document.getElementById('analysisDetail');
+        detail.innerHTML = `
+            <div style="margin-bottom:12px;">
+                <div style="font-size:1rem; font-weight:800; text-align:center; margin-bottom:10px;">
+                    ${formatTwoDigit(selectedAnalysisNum)}号 近${maxCheck}期出现${stats.count}次(${stats.probability}%)
+                    <span class="${percentClass}"> ${percentDiff >= 0 ? '+' : ''}${percentDiff}%</span>
+                </div>
+                <div class="analysis-stats">
+                    <div class="stat-card"><div class="stat-value">${stats.count}</div><div class="stat-label">出现次数</div></div>
+                    <div class="stat-card"><div class="stat-value">${stats.probability}%</div><div class="stat-label">概率</div></div>
+                    <div class="stat-card"><div class="stat-value">${stats.theoretical}%</div><div class="stat-label">理论概率</div></div>
+                    <div class="stat-card"><div class="stat-value">${stats.avgGap}</div><div class="stat-label">平均间隔</div></div>
+                    <div class="stat-card"><div class="stat-value">${stats.missing}</div><div class="stat-label">未开期数</div></div>
+                    <div class="stat-card"><div class="stat-value">${stats.minGap}/${stats.maxGap}</div><div class="stat-label">最小/最大间隔</div></div>
+                </div>
+            </div>
+            <div style="margin-bottom:12px;">
+                <div style="font-weight:600; margin-bottom:6px;">🔗 号码关联</div>
+                <div class="trend-bars">
+                    <div class="trend-item"><div>出${formatTwoDigit(selectedAnalysisNum)}之前</div><div>${Object.entries(stats.beforeMap).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,v])=>`${formatTwoDigit(k)}(${v})`).join(', ') || '无'}</div></div>
+                    <div class="trend-item"><div>出${formatTwoDigit(selectedAnalysisNum)}之后</div><div>${Object.entries(stats.afterMap).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,v])=>`${formatTwoDigit(k)}(${v})`).join(', ') || '无'}</div></div>
+                </div>
+            </div>
+            <div>
+                <div style="font-weight:600; margin-bottom:6px;">📊 出 ${formatTwoDigit(selectedAnalysisNum)} 后下期概率偏差 TOP10</div>
+                <div class="top10-list">${stats.top10.map(t => `<div class="top10-item ${parseFloat(t.deviation) > 0 ? 'hit-positive' : 'hit-negative'}">${formatTwoDigit(t.num)} ${t.deviation>0?'+':''}${t.deviation}%</div>`).join('')}</div>
+            </div>
+        `;
+    }
+    
+    // ==================== 公式选项渲染 ====================
+    function getFormulaHitRate(periods, formulaIdx, maxCheck=100) {
+        let hit=0, total=0;
+        for(let i=3; i<periods.length && total<maxCheck; i++) {
+            const p3=periods[i-3], p2=periods[i-2], p1=periods[i-1], target=periods[i];
+            const kill = killFormulas[formulaIdx].func(p1, p2, p3);
+            if(kill && target.comb) { total++; if(target.comb !== kill) hit++; }
+        }
+        return { hit, total, rate: total>0 ? hit/total : 0 };
+    }
+    
+    async function renderFormulaTabs(periods) {
+        const container = document.getElementById('formulaTabs');
+        container.innerHTML = '';
+        const formulaGroups = [
+            { name: '公式1', indices: [0,1] },
+            { name: '公式2', indices: [2,3,4] },
+            { name: '公式3', indices: [5,6] },
+            { name: '公式4', indices: [7,8] }
+        ];
+        const recommendation = await recommendBestFormula(periods);
+        let recommendedGroupIdx = -1;
+        if (recommendation) {
+            if (recommendation.idx <= 1) recommendedGroupIdx = 0;
+            else if (recommendation.idx <= 4) recommendedGroupIdx = 1;
+            else if (recommendation.idx <= 6) recommendedGroupIdx = 2;
+            else recommendedGroupIdx = 3;
+        }
+        for (let g = 0; g < formulaGroups.length; g++) {
+            const group = formulaGroups[g];
+            let totalRate = 0;
+            group.indices.forEach(idx => { totalRate += getFormulaHitRate(periods, idx, 100).rate; });
+            const avgRate = (totalRate / group.indices.length * 100).toFixed(1);
+            const tab = document.createElement('div');
+            const isActive = group.indices.includes(currentFormulaIdx);
+            tab.className = `formula-tab ${isActive ? 'active' : ''}`;
+            if (recommendedGroupIdx === g && recommendation) {
+                tab.classList.add('recommended');
+                const bubble = document.createElement('div');
+                bubble.className = 'recommend-bubble';
+                if (recommendation.isHot) {
+                    bubble.textContent = `⚠️ 过热`;
+                } else {
+                    bubble.textContent = `🔥 杀组推荐 ${recommendation.name.split('_')[1]}`;
+                }
+                tab.appendChild(bubble);
+            }
+            const nameSpan = document.createElement('div'); nameSpan.className = 'tab-name'; nameSpan.textContent = group.name;
+            const statsSpan = document.createElement('div'); statsSpan.className = 'tab-stats'; statsSpan.textContent = `${avgRate}%`;
+            tab.appendChild(nameSpan); tab.appendChild(statsSpan);
+            tab.onclick = () => {
+                currentFormulaIdx = group.indices[0];
+                renderFormulaTabs(periods);
+                renderSubOptions(periods);
+                refreshAll();
+            };
+            container.appendChild(tab);
+        }
+    }
+    
+    async function renderSubOptions(periods) {
+        const container = document.getElementById('subOptions');
+        const currentGroup = (() => {
+            if (currentFormulaIdx <= 1) return { indices: [0,1], name: '公式1' };
+            if (currentFormulaIdx <= 4) return { indices: [2,3,4], name: '公式2' };
+            if (currentFormulaIdx <= 6) return { indices: [5,6], name: '公式3' };
+            return { indices: [7,8], name: '公式4' };
+        })();
+        container.innerHTML = '';
+        for (let idx of currentGroup.indices) {
+            const stats = getFormulaHitRate(periods, idx, 100);
+            const btn = document.createElement('div');
+            btn.className = `sub-option ${currentFormulaIdx === idx ? 'active' : ''}`;
+            btn.innerHTML = `${killFormulas[idx].name} <span style="font-size:0.55rem;">(${stats.hit}/${stats.total})</span>`;
+            btn.onclick = () => {
+                currentFormulaIdx = idx;
+                renderFormulaTabs(periods);
+                renderSubOptions(periods);
+                refreshAll();
+            };
+            container.appendChild(btn);
+        }
+    }
+    
+    // ==================== 每日独立访客 ====================
+    function updateDailyVisitorCount() {
+        const today = new Date().toLocaleDateString('zh-CN', { timeZone: 'Asia/Shanghai' });
+        const storageKey = 'pc28_daily_visitor';
+        let data = localStorage.getItem(storageKey);
+        let visitorData = data ? JSON.parse(data) : { date: '', count: 0 };
+        if (visitorData.date !== today) visitorData = { date: today, count: 1 };
+        localStorage.setItem(storageKey, JSON.stringify(visitorData));
+        const counterEl = document.getElementById('visitorCounter');
+        if (counterEl) counterEl.innerHTML = `今日独立访客：${visitorData.count}`;
+    }
+    
+    // ==================== 主刷新 ====================
+    async function refreshAll() {
+        const btn = document.getElementById('refreshBtn');
+        btn.disabled = true; btn.innerText = '加载中...';
+        try {
+            const rawData = await fetchKjData(500);
+            if (!rawData.length) throw new Error('无数据');
+            let allPeriods = parseKjToPeriod(rawData);
+            if (allPeriods.length < 50) throw new Error('数据不足50期');
+            allPeriodsCache = allPeriods;
+            let sortedByTime = [...allPeriods].sort((a, b) => parseInt(a.nbr) - parseInt(b.nbr));
+            
+            await renderFormulaTabs(sortedByTime);
+            await renderSubOptions(sortedByTime);
+            
+            const len = sortedByTime.length;
+            const p1 = sortedByTime[len-1], p2 = sortedByTime[len-2], p3 = sortedByTime[len-3];
+            const nextKill = killFormulas[currentFormulaIdx].func(p1, p2, p3);
+            document.getElementById('killGroup').innerText = nextKill || '--';
+            
+            // 双组预测
+            const xyz = calculateXYZ(p1, p2, p3);
+            const trend = calculateTrendFromXYZ(xyz);
+            const excludeNext = getAllExclude([p1, p2, p3], nextKill);
+            const remainingNext = Array.from({length:28},(_,i)=>i).filter(n=>!excludeNext.includes(n));
+            const dual = getDualPredictions([p1, p2, p3], nextKill, remainingNext);
+            document.getElementById('predA').innerText = dual.a;
+            document.getElementById('predB').innerText = dual.b;
+            
+            // 双组推荐检测
+            const dualCandidates = [dual.a, dual.b].filter(c => c !== '--');
+            const dualRec = await recommendDualCombinations(sortedByTime, dualCandidates);
+            const predItemA = document.getElementById('predItemA');
+            const predItemB = document.getElementById('predItemB');
+            
+            // 清除旧气泡
+            [predItemA, predItemB].forEach(item => {
+                const oldBubble = item.querySelector('.dual-bubble');
+                if (oldBubble) oldBubble.remove();
+                item.classList.remove('recommended');
+            });
+            
+            if (dualRec[dual.a] && dualRec[dual.a].isHot) {
+                predItemA.classList.add('recommended');
+                const bubble = document.createElement('div');
+                bubble.className = 'dual-bubble';
+                bubble.textContent = `⚠️ 已连${dualRec[dual.a].current}期，过热`;
+                predItemA.appendChild(bubble);
+            }
+            if (dualRec[dual.b] && dualRec[dual.b].isHot) {
+                predItemB.classList.add('recommended');
+                const bubble = document.createElement('div');
+                bubble.className = 'dual-bubble';
+                bubble.textContent = `⚠️ 已连${dualRec[dual.b].current}期，过热`;
+                predItemB.appendChild(bubble);
+            }
+            
+            // 特码推荐（4个最可能号码）
+            const top4 = await getTop4Numbers(sortedByTime, nextKill, trend);
+            document.getElementById('remainCount').innerHTML = `最可能4码`;
+            const numbersGrid = document.getElementById('remainingNumbers');
+            numbersGrid.innerHTML = top4.map(n => `<span class="num-badge remain">${formatTwoDigit(n)}</span>`).join('');
+            
+            // 长龙提示
+            showDragonAlert();
+            
+            // 历史表格
+            const sortedByNbrDesc = [...allPeriods].sort((a, b) => parseInt(b.nbr) - parseInt(a.nbr));
+            const rows = [];
+            for (let i = 0; i < Math.min(sortedByNbrDesc.length, 100); i++) {
+                const curr = sortedByNbrDesc[i];
+                const combClass = { '大单':'badge-dadan','大双':'badge-dashuang','小单':'badge-xiaodan','小双':'badge-xiaoshuang' }[curr.comb] || '';
+                let killPred='--', killResult='', dualPred='--', dualHit='', remainList='', remainHit='';
+                const allSortedByTime = [...allPeriods].sort((a,b)=>parseInt(a.nbr)-parseInt(b.nbr));
+                const currIdx = allSortedByTime.findIndex(p => p.nbr === curr.nbr);
+                if (currIdx >= 3) {
+                    const prev3 = allSortedByTime[currIdx-3], prev2 = allSortedByTime[currIdx-2], prev1 = allSortedByTime[currIdx-1];
+                    const kill = killFormulas[currentFormulaIdx].func(prev1, prev2, prev3);
+                    if (kill) {
+                        killPred = kill;
+                        killResult = (curr.comb !== kill) ? '<span class="hit-true">✔</span>' : '<span class="hit-false">✘</span>';
+                    }
+                    const ex = getAllExclude([prev1, prev2, prev3], kill);
+                    const rem = Array.from({length:28},(_,i)=>i).filter(n=>!ex.includes(n));
+                    const dualTmp = getDualPredictions([prev1, prev2, prev3], kill, rem);
+                    dualPred = `${dualTmp.a} / ${dualTmp.b}`;
+                    dualHit = (dualTmp.a === curr.comb || dualTmp.b === curr.comb) ? '<span class="hit-true">✔</span>' : '<span class="hit-false">✘</span>';
+                    const top4Hist = await getTop4Numbers(allSortedByTime.slice(0, currIdx), kill, calculateTrendFromXYZ(calculateXYZ(prev1, prev2, prev3)));
+                    remainList = top4Hist.map(n=>formatTwoDigit(n)).join(',');
+                    remainHit = top4Hist.includes(curr.sum) ? '<span class="hit-true">✔</span>' : '<span class="hit-false">✘</span>';
+                } else {
+                    killResult = dualHit = remainHit = '<span class="hit-false">-</span>';
+                }
+                rows.push(`<tr>${[curr.nbr||'-', curr.drawNumber||'-', curr.sum, `<span class="badge ${combClass}">${curr.comb}</span>`, killPred, killResult, dualPred, dualHit, remainList||'--', remainHit].map(cell => `<td>${cell}</td>`).join('')}</tr>`);
+            }
+            document.getElementById('historyBody').innerHTML = rows.join('');
+            if (analysisExpanded) renderAnalysis(sortedByTime);
+            fetchAuxData();
+        } catch(err) {
+            console.error(err);
+            document.getElementById('historyBody').innerHTML = '<tr><td colspan="10">加载失败，请检查网络</td></tr>';
+        } finally {
+            btn.disabled = false; btn.innerText = '刷新数据';
+        }
+    }
+    
+    function startAutoRefresh() { refreshAll(); if(refreshInterval) clearInterval(refreshInterval); refreshInterval = setInterval(refreshAll, 5000); }
+    async function init() {
+        updateDailyVisitorCount();
+        startCountdown();
+        await refreshAll();
+        startAutoRefresh();
+    }
+    
+    document.getElementById('analysisTitle').addEventListener('click', () => {
+        const content = document.getElementById('analysisContent');
+        analysisExpanded = !analysisExpanded;
+        if (analysisExpanded) {
+            content.classList.add('show');
+            if (allPeriodsCache.length) renderAnalysis(allPeriodsCache);
+        } else {
+            content.classList.remove('show');
+        }
+    });
+    document.getElementById('analyzeBtn').addEventListener('click', () => { if(allPeriodsCache.length) renderAnalysis(allPeriodsCache); });
+    document.getElementById('refreshBtn').addEventListener('click', refreshAll);
+    init();
+</script>
+</body>
+</html>
